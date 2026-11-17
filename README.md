@@ -4,7 +4,7 @@ The Go client of [1billion](https://1billion.clowk.in): transactional e-mail on 
 server: an API key must never reach a browser.
 
 ```bash
-go get github.com/clowk/1billion-go
+go get github.com/clowk-in/1billion-go
 ```
 
 ```go
