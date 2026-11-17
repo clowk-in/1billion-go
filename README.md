@@ -18,7 +18,7 @@ out, err := client.Send(ctx, onebillion.Mail{
 }, onebillion.IdempotencyKey("login-jane-482913"))
 
 switch {
-case onebillion.NoCredits(err): // 402: buy credits in the console
+case onebillion.NoCredits(err): // 429: no credits today; they come back at 00:00 UTC, or buy a pack
 case onebillion.Refused(err):   // 422: a bad message, or a recipient that failed a check
 case err != nil:                // the rest; *onebillion.Error has Status and Message
 }

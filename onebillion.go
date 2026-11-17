@@ -122,13 +122,14 @@ type Validation struct {
 }
 
 // Error is an answer that is not a success. Status is 0 for a network error. Check and
-// Address come with a 422 of a check; BuyURL with a 402.
+// Address come with a 422 of a check; RetryAfter and BuyURL with a 429.
 type Error struct {
-	Status  int    `json:"-"`
-	Message string `json:"error"`
-	Check   string `json:"check"`
-	Address string `json:"address"`
-	BuyURL  string `json:"buy_url"`
+	Status     int    `json:"-"`
+	Message    string `json:"error"`
+	Check      string `json:"check"`
+	Address    string `json:"address"`
+	RetryAfter int    `json:"retry_after"`
+	BuyURL     string `json:"buy_url"`
 }
 
 func (e *Error) Error() string {
@@ -139,8 +140,9 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("onebillion: %d %s", e.Status, e.Message)
 }
 
-// NoCredits says if err is a 402: the workspace has no credits for these recipients.
-func NoCredits(err error) bool { return status(err) == http.StatusPaymentRequired }
+// NoCredits says if err is a 429: the workspace has no credits for these recipients today.
+// The credits of the next day come at 00:00 UTC (Error.RetryAfter seconds).
+func NoCredits(err error) bool { return status(err) == http.StatusTooManyRequests }
 
 // Refused says if err is a 422: a bad message or a recipient that failed a check.
 func Refused(err error) bool { return status(err) == http.StatusUnprocessableEntity }

@@ -144,7 +144,7 @@ func TestNeverRetriesOtherErrors(t *testing.T) {
 }
 
 func TestNoCredits(t *testing.T) {
-	_, c := start(t, reply(402, `{"error":"not enough credits","buy_url":"https://1billion.clowk.in/usage"}`))
+	_, c := start(t, reply(429, `{"error":"not enough credits","retry_after":3600,"buy_url":"https://1billion.clowk.in/usage"}`))
 
 	_, err := c.Send(context.Background(), Mail{From: "a@app.com", To: []string{"b@x.com"}, Subject: "s", Text: "t"})
 
