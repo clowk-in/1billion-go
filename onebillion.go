@@ -1,4 +1,5 @@
-// Package onebillion is the Go client of 1billion: transactional e-mail with our own MTA.
+// Package onebillion is the Go client of 1billion: transactional e-mail on its own sending
+// infrastructure.
 // Use it only on a server: an API key must never reach a browser.
 //
 //	client := onebillion.New(os.Getenv("ONEBILLION_KEY"))
