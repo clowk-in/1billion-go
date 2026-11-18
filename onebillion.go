@@ -2,9 +2,9 @@
 // infrastructure.
 // Use it only on a server: an API key must never reach a browser.
 //
-//	client := onebillion.New(os.Getenv("ONEBILLION_KEY"))
+//	client := onebillion.New("") // the key of ONEBILLION_API_KEY
 //
-//	_, err := client.Send(ctx, onebillion.Mail{
+//	_, err := client.Emails.Send(ctx, onebillion.Mail{
 //		From:    "App <hi@app.com>",
 //		To:      []string{"ana@example.com"},
 //		Subject: "Seu código",
@@ -26,6 +26,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -43,6 +44,17 @@ type Client struct {
 	url     string
 	http    *http.Client
 	backoff time.Duration
+
+	// Emails has Send, the same call as Client.Send, so a move from Resend reads the same.
+	Emails *Emails
+}
+
+// Emails sends mail: client.Emails.Send is the same call as client.Send.
+type Emails struct{ client *Client }
+
+// Send posts a mail, as Client.Send.
+func (e *Emails) Send(ctx context.Context, m Mail, opts ...SendOption) (Accepted, error) {
+	return e.client.Send(ctx, m, opts...)
 }
 
 // Option changes a Client.
@@ -57,9 +69,21 @@ func WithHTTPClient(h *http.Client) Option { return func(c *Client) { c.http = h
 // WithBackoff sets the first wait between tries; it doubles each time.
 func WithBackoff(d time.Duration) Option { return func(c *Client) { c.backoff = d } }
 
-// New makes a client with an API key of an app.
+// New makes a client with an API key of an app. An empty key reads ONEBILLION_API_KEY. The URL
+// is ONEBILLION_URL, else DefaultURL, unless WithURL changes it.
 func New(key string, opts ...Option) *Client {
-	c := &Client{key: key, url: DefaultURL, http: &http.Client{Timeout: 10 * time.Second}, backoff: 500 * time.Millisecond}
+	if key == "" {
+		key = os.Getenv("ONEBILLION_API_KEY")
+	}
+
+	base := os.Getenv("ONEBILLION_URL")
+
+	if base == "" {
+		base = DefaultURL
+	}
+
+	c := &Client{key: key, url: base, http: &http.Client{Timeout: 10 * time.Second}, backoff: 500 * time.Millisecond}
+	c.Emails = &Emails{client: c}
 
 	for _, opt := range opts {
 		opt(c)

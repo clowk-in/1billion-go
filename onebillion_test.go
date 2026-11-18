@@ -212,6 +212,8 @@ func TestNetworkErrorMessageAndCancel(t *testing.T) {
 }
 
 func TestDefaults(t *testing.T) {
+	t.Setenv("ONEBILLION_URL", "")
+
 	c := New("key")
 
 	if c.url != DefaultURL || c.http.Timeout != 10*time.Second {
@@ -219,7 +221,7 @@ func TestDefaults(t *testing.T) {
 	}
 }
 
-// Against a real console: ONEBILLION_URL=http://localhost:3100 ONEBILLION_KEY=dev-token
+// Against a real console: ONEBILLION_URL=http://localhost:3100 ONEBILLION_API_KEY=dev-token
 // ONEBILLION_FROM="Dev <hi@dev.test>" go test ./...
 func TestIntegration(t *testing.T) {
 	base := os.Getenv("ONEBILLION_URL")
@@ -228,7 +230,7 @@ func TestIntegration(t *testing.T) {
 		t.Skip("set ONEBILLION_URL to run")
 	}
 
-	c := New(os.Getenv("ONEBILLION_KEY"), WithURL(base))
+	c := New(os.Getenv("ONEBILLION_API_KEY"), WithURL(base))
 	ctx := context.Background()
 
 	out, err := c.Send(ctx, Mail{From: os.Getenv("ONEBILLION_FROM"), To: []string{"sdk-go@gmail.com"}, Subject: "SDK Go", Text: "Olá"})

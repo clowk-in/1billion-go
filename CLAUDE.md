@@ -5,12 +5,13 @@ Read this file first. It tells you what this repo is, how to test it, and its ru
 ## What it is
 
 The official Go client of [1billion](https://1billion.clowk.in), a transactional e-mail API. One package,
-`onebillion`, in `onebillion.go`, with no dependencies. The API it follows is
+`onebillion`, in `onebillion.go` (the client) and `webhook.go` (`VerifySignature`, `Event`), with no
+dependencies. The API it follows is
 [openapi.yml](https://1billion.clowk.in/openapi.yml).
 
 | Call | Endpoint |
 |---|---|
-| `Client.Send` | `POST /send` |
+| `Client.Send`, `Client.Emails.Send` | `POST /send` |
 | `Client.Message` | `GET /messages/{id}` |
 | `Client.Unsuppress` | `DELETE /suppressions/{address}` |
 | `Client.Validate` | `POST /validate` |
@@ -26,7 +27,7 @@ make lint    # gofmt -l . prints nothing; go vet ./... is clean
 make cover   # all code at 100%
 ```
 
-The integration test runs only with `ONEBILLION_URL`, `ONEBILLION_KEY` and `ONEBILLION_FROM`.
+The integration test runs only with `ONEBILLION_URL`, `ONEBILLION_API_KEY` and `ONEBILLION_FROM`.
 
 ## Rules
 

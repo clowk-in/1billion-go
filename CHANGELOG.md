@@ -6,6 +6,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- `client.Emails.Send`: the same call as `client.Send`, so a move from Resend reads the same.
+- `onebillion.VerifySignature(payload, r.Header, secret)`: checks the signature of a webhook and returns the `Event`. A bad signature matches `onebillion.ErrInvalidSignature`.
+
+### Changed
+
+- `onebillion.New("")` reads the key from `ONEBILLION_API_KEY`, and the URL comes from `ONEBILLION_URL` when it is set.
+- The env var of the docs and of the integration test is `ONEBILLION_API_KEY` (it was `ONEBILLION_KEY`).
+
 ## [0.2.0] - 2026-11-18
 
 ### Added

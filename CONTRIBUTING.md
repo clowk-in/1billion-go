@@ -26,7 +26,7 @@ The unit tests use a local test server: no network and no API key. The integrati
 `ONEBILLION_URL` is set:
 
 ```bash
-ONEBILLION_URL=https://1billion.clowk.in ONEBILLION_KEY=<a test key> ONEBILLION_FROM="Test <hi@your-domain.com>" go test ./...
+ONEBILLION_URL=https://1billion.clowk.in ONEBILLION_API_KEY=<a test key> ONEBILLION_FROM="Test <hi@your-domain.com>" go test ./...
 ```
 
 ## Rules

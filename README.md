@@ -42,7 +42,12 @@ Go 1.24 or newer. The package name is `onebillion` (a Go name can not start with
 
 ## Quick start
 
-Make an API key in the [console](https://1billion.clowk.in), and verify the domain that you send from.
+Make an API key in the [console](https://1billion.clowk.in), and verify the domain that you send from. Put the
+key in the environment:
+
+```bash
+export ONEBILLION_API_KEY=<your API key>
+```
 
 ```go
 package main
@@ -50,15 +55,14 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
 	onebillion "github.com/clowk-in/1billion-go"
 )
 
 func main() {
-	client := onebillion.New(os.Getenv("ONEBILLION_KEY"))
+	client := onebillion.New("") // the key of ONEBILLION_API_KEY
 
-	out, err := client.Send(context.Background(), onebillion.Mail{
+	out, err := client.Emails.Send(context.Background(), onebillion.Mail{
 		From:    "Acme <hi@acme.com>",
 		To:      []string{"jane@example.com"},
 		Subject: "Your code",
@@ -75,6 +79,37 @@ func main() {
 
 `Send` returns when 1billion has the mail (`202`, status `accepted`). The delivery runs after that, with its
 own retries. Each recipient gets a message id of its own.
+
+`client.Emails.Send` reads as `resend.Emails.Send`, so a move from Resend changes few lines. It is the same
+call as `client.Send`. An empty key reads `ONEBILLION_API_KEY`; the URL is `ONEBILLION_URL`, else
+`https://1billion.clowk.in`.
+
+## Verify a webhook
+
+```go
+http.HandleFunc("/webhooks/1billion", func(w http.ResponseWriter, r *http.Request) {
+	payload, _ := io.ReadAll(r.Body)
+
+	event, err := onebillion.VerifySignature(payload, r.Header, "")
+
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		return
+	}
+
+	if event.Type == "bounced" {
+		markBounced(event.To)
+	}
+
+	w.WriteHeader(http.StatusOK)
+})
+```
+
+`VerifySignature` checks `1B-Signature` against the raw body and `1B-Timestamp`, and returns the `Event`
+(`ID`, `Type`, `MessageID`, `To`, `Detail`, `CreatedAt`). An empty secret reads `ONEBILLION_WEBHOOK_SECRET`.
+A bad or missing signature, or a timestamp more than 5 minutes old, gives an error that `errors.Is` matches to
+`onebillion.ErrInvalidSignature`.
 
 ## Send
 
@@ -179,7 +214,7 @@ err := client.Unsuppress(ctx, "jane@example.com")
 ## Options
 
 ```go
-client := onebillion.New(key,
+client := onebillion.New("", // "" reads ONEBILLION_API_KEY
 	onebillion.WithURL("http://localhost:3100"),
 	onebillion.WithHTTPClient(&http.Client{Timeout: 5 * time.Second}),
 	onebillion.WithBackoff(time.Second),
@@ -188,7 +223,7 @@ client := onebillion.New(key,
 
 | Option | Default | What |
 |---|---|---|
-| `WithURL` | `https://1billion.clowk.in` | another console, for example a dev stack |
+| `WithURL` | `ONEBILLION_URL`, else `https://1billion.clowk.in` | another console, for example a dev stack |
 | `WithHTTPClient` | a client with a 10 s timeout | your own `*http.Client` |
 | `WithBackoff` | 500 ms | the first wait between tries; it doubles each time |
 
