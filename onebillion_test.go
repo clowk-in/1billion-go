@@ -156,7 +156,7 @@ func TestNoCredits(t *testing.T) {
 }
 
 func TestMessageUnsuppressValidate(t *testing.T) {
-	s, c := start(t, reply(200, `{"id":"m1","status":"sent"}`), reply(204, ``), reply(200, `{"valid":false,"checks":[{"check":"disposable","ok":false}]}`))
+	s, c := start(t, reply(200, `{"id":"m1","status":"sent"}`), reply(204, ``), reply(200, `{"valid":false,"result":"risky","reason":"disposable","score":0.2,"disposable":true,"checks":[{"check":"disposable","ok":false}]}`))
 	ctx := context.Background()
 
 	msg, err := c.Message(ctx, "m1")
@@ -171,7 +171,7 @@ func TestMessageUnsuppressValidate(t *testing.T) {
 
 	v, err := c.Validate(ctx, "x@tmp.com")
 
-	if err != nil || v.Valid || v.Checks[0].Check != "disposable" {
+	if err != nil || v.Valid || v.Checks[0].Check != "disposable" || v.Result != "risky" || v.Score != 0.2 || !v.Disposable {
 		t.Fatalf("v = %+v, err = %v", v, err)
 	}
 

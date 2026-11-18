@@ -113,8 +113,32 @@ type Message struct {
 // Validation is the answer of POST /validate.
 type Validation struct {
 	Address string `json:"address"`
-	Valid   bool   `json:"valid"`
-	Checks  []struct {
+	User    string `json:"user"`
+	Domain  string `json:"domain"`
+
+	// The verdict: deliverable, risky or undeliverable; why; and a score from 0 to 1.
+	Result string  `json:"result"`
+	Reason string  `json:"reason"`
+	Score  float64 `json:"score"`
+
+	// The signals.
+	DidYouMean  *string `json:"did_you_mean"`
+	Free        bool    `json:"free"`
+	Role        bool    `json:"role"`
+	Disposable  bool    `json:"disposable"`
+	Subaddress  bool    `json:"subaddress"`
+	BaseAddress *string `json:"base_address"`
+	MXFound     bool    `json:"mx_found"`
+	MXHost      *string `json:"mx_host"`
+	Suppressed  bool    `json:"suppressed"`
+	History     *string `json:"history"`
+
+	// The cost of this validation, in credits.
+	Credits int `json:"credits"`
+
+	// The gates that /send runs.
+	Valid  bool `json:"valid"`
+	Checks []struct {
 		Check  string `json:"check"`
 		OK     bool   `json:"ok"`
 		Detail string `json:"detail"`
@@ -206,7 +230,8 @@ func (c *Client) Unsuppress(ctx context.Context, address string) error {
 	return c.do(ctx, http.MethodDelete, "/suppressions/"+url.PathEscape(address), nil, "", nil)
 }
 
-// Validate runs the checks of an address. It sends nothing and costs nothing.
+// Validate returns the verdict of an address (result, reason, score and the signals). It sends
+// nothing and costs 100 credits.
 func (c *Client) Validate(ctx context.Context, address string) (Validation, error) {
 	var out Validation
 
