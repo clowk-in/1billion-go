@@ -126,6 +126,7 @@ type Validation struct {
 	Free        bool    `json:"free"`
 	Role        bool    `json:"role"`
 	Disposable  bool    `json:"disposable"`
+	Generated   bool    `json:"generated"`
 	Subaddress  bool    `json:"subaddress"`
 	BaseAddress *string `json:"base_address"`
 	MXFound     bool    `json:"mx_found"`
