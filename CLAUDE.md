@@ -46,7 +46,7 @@ The integration test runs only with `ONEBILLION_URL`, `ONEBILLION_API_KEY` and `
 
 - `make tag patch|minor|major` (`scripts/release.sh`) bumps `Version` in `onebillion.go`, closes the
   `Unreleased` section of `CHANGELOG.md`, commits `release: X.Y.Z`, tags `vX.Y.Z` and asks before the push.
-  `YES=1` pushes without asking. `make -n tag minor` is a dry run.
+  `YES=1` pushes without asking. `make tag X.Y.Z` sets an exact version (higher than the latest tag), to keep the 3 SDKs on one version. `make -n tag minor` is a dry run.
 - A commit `tag(patch|minor|major): ...` on `main` does the same through `tag.yml`, after CI passes.
 - CI tests the release commit, then `release.yml` makes the GitHub release from `CHANGELOG.md`.
 - Never push a `v*` tag by hand: the version in `onebillion.go` must match the tag.

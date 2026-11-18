@@ -58,7 +58,7 @@ The maintainers release from `main`:
 
 - `make tag patch|minor|major` bumps `Version` in `onebillion.go`, closes the `Unreleased` section of
   `CHANGELOG.md`, makes the commit `release: X.Y.Z` and the tag `vX.Y.Z`, and asks before it pushes.
-  `make -n tag minor` shows the next version and writes nothing.
+  `make tag 0.3.0` sets an exact version instead; it must be higher than the latest tag. `make -n tag minor` shows the next version and writes nothing.
 - Or merge a commit with the subject `tag(patch): ...`, `tag(minor): ...` or `tag(major): ...`. When CI
   passes on `main`, `tag.yml` runs the same script.
 
