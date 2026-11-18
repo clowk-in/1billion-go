@@ -133,8 +133,9 @@ type Validation struct {
 	Suppressed  bool    `json:"suppressed"`
 	History     *string `json:"history"`
 
-	// The cost of this validation, in credits.
-	Credits int `json:"credits"`
+	// The cost of this validation, in credits, and how long it took.
+	Credits    int `json:"credits"`
+	DurationMS int `json:"duration_ms"`
 
 	// The gates that /send runs.
 	Valid  bool `json:"valid"`
