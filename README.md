@@ -116,6 +116,29 @@ http.HandleFunc("/webhooks/1billion", func(w http.ResponseWriter, r *http.Reques
 A bad or missing signature, or a timestamp more than 5 minutes old, gives an error that `errors.Is` matches to
 `onebillion.ErrInvalidSignature`.
 
+### A received mail
+
+A mail to an address whose route is "webhook" (Recebimento, in the console) comes as the event
+`mail.received`. Its `Data` is the whole mail, as a `MailReceived`. 1billion keeps no content, so this is the
+only time your app gets it.
+
+```go
+if event.Type == onebillion.EventMailReceived {
+	mail := event.Data
+
+	saveFeedback(mail.MailFrom, mail.Subject, mail.Text)
+
+	for _, file := range mail.Attachments {
+		log.Println(file.Filename, file.ContentType, file.Size)
+	}
+}
+```
+
+`MailReceived` has `ID`, `From`, `To`, `MailFrom`, `Subject`, `MessageID`, `Text`, `HTML`, `Attachments`
+(the name, type and size of each file, never its content), `Auth` (`SPF`, `DKIM` and `DMARC` as our mx saw
+them), `Size` and `ReceivedAt`. `Text` and `HTML` are whole, never cut. A field that the mail does not have is
+empty. The other events have no `Data` (`nil`).
+
 ## Send
 
 ```go
