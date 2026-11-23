@@ -21,6 +21,10 @@ const Tolerance = 5 * time.Minute
 // Tolerance. Check it with errors.Is.
 var ErrInvalidSignature = errors.New("onebillion: invalid signature")
 
+// EventMailReceived is the type of the event of a received mail: a mail to an address whose
+// route is "webhook". Its Event has Data.
+const EventMailReceived = "mail.received"
+
 // Event is the body of a webhook.
 type Event struct {
 	ID        string `json:"id"`
@@ -29,6 +33,41 @@ type Event struct {
 	To        string `json:"to"`
 	Detail    string `json:"detail"`
 	CreatedAt string `json:"created_at"`
+
+	// Data is the received mail of a mail.received event; nil for the other events.
+	Data *MailReceived `json:"data,omitempty"`
+}
+
+// MailReceived is the mail of a mail.received event, whole. 1billion keeps no content, so this
+// is the only time the app gets it. A field that the mail does not have is empty.
+type MailReceived struct {
+	ID          string         `json:"id"`
+	From        string         `json:"from"`
+	To          string         `json:"to"`
+	MailFrom    string         `json:"mail_from"`
+	Subject     string         `json:"subject"`
+	MessageID   string         `json:"message_id"`
+	Text        string         `json:"text"`
+	HTML        string         `json:"html"`
+	Attachments []ReceivedFile `json:"attachments"`
+	Auth        MailAuth       `json:"auth"`
+	Size        int            `json:"size"`
+	ReceivedAt  string         `json:"received_at"`
+}
+
+// ReceivedFile is one attachment of a received mail: its name, type and size, never its content.
+type ReceivedFile struct {
+	Filename    string `json:"filename"`
+	ContentType string `json:"content_type"`
+	Size        int    `json:"size"`
+}
+
+// MailAuth is what the mx of 1billion found of the sender: "pass", "fail", "none" and the others
+// of RFC 8601.
+type MailAuth struct {
+	SPF   string `json:"spf"`
+	DKIM  string `json:"dkim"`
+	DMARC string `json:"dmarc"`
 }
 
 // VerifySignature checks the signature of a webhook and returns its event. payload is the raw

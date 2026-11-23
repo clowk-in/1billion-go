@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- The event of a received mail: `onebillion.EventMailReceived` (`"mail.received"`), and `Event.Data`, a
+  `*MailReceived` with the whole mail (`From`, `Subject`, `Text`, `HTML`, `Attachments`, `Auth` and more). It is
+  `nil` for the other events.
+
 ## [0.3.0] - 2026-11-18
 
 ### Added

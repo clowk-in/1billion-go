@@ -39,6 +39,39 @@ func TestVerifySignature(t *testing.T) {
 	}
 }
 
+// A mail.received event has the received mail in Data, with its own type. The other events
+// have no Data.
+func TestVerifySignatureMailReceived(t *testing.T) {
+	payload := `{"id":"e2","type":"mail.received","message_id":"","to":"feedback@example.com","detail":"","created_at":"2026-11-19T12:00:01Z",` +
+		`"data":{"id":"r1","from":"Ana <ana@example.org>","to":"feedback@example.com","mail_from":"ana@example.org","subject":"Oi",` +
+		`"message_id":"<a@example.org>","text":"Oi, tudo bem?","html":null,` +
+		`"attachments":[{"filename":"nota.pdf","content_type":"application/pdf","size":48213}],` +
+		`"auth":{"spf":"pass","dkim":"pass","dmarc":"pass"},"size":52011,"received_at":"2026-11-19T12:00:00.000Z"}}`
+
+	event, err := VerifySignature([]byte(payload), signed(time.Now(), testSecret, payload), testSecret)
+
+	if err != nil || event.Type != EventMailReceived || event.Data == nil {
+		t.Fatalf("event = %+v, err = %v", event, err)
+	}
+
+	mail := *event.Data
+	file := ReceivedFile{Filename: "nota.pdf", ContentType: "application/pdf", Size: 48213}
+
+	if mail.Subject != "Oi" || mail.Text != "Oi, tudo bem?" || mail.HTML != "" || mail.MailFrom != "ana@example.org" || mail.Size != 52011 {
+		t.Fatalf("mail = %+v", mail)
+	}
+
+	if len(mail.Attachments) != 1 || mail.Attachments[0] != file || mail.Auth != (MailAuth{SPF: "pass", DKIM: "pass", DMARC: "pass"}) {
+		t.Fatalf("mail = %+v", mail)
+	}
+
+	delivered, _ := VerifySignature([]byte(testPayload), signed(time.Now(), testSecret, testPayload), testSecret)
+
+	if delivered.Data != nil {
+		t.Fatalf("a delivered event has data: %+v", delivered.Data)
+	}
+}
+
 func TestVerifySignatureSecretFromEnv(t *testing.T) {
 	t.Setenv("ONEBILLION_WEBHOOK_SECRET", testSecret)
 
