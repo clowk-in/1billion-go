@@ -31,7 +31,7 @@ import (
 )
 
 // Version is the version of this client, in its User-Agent.
-const Version = "0.4.0"
+const Version = "0.3.0"
 
 // DefaultURL is the public API.
 const DefaultURL = "https://1billion.clowk.in"
